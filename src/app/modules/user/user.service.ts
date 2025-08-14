@@ -1,5 +1,6 @@
 import { User } from './user.model';
 
+
 export const UserService = {
   // 🔹 Get all users
   async getAllUsers() {
@@ -63,3 +64,4 @@ export const UserService = {
     return await user.save();
   }
 };
+

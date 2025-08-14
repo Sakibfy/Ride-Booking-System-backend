@@ -1,9 +1,7 @@
-import { Request, Router, Response, NextFunction } from "express";
+import { Router } from "express";
 import { UserControllers } from './user.controller';
-import { checkAuth } from '../../middlewares/auth.middleware';
-import { checkRole } from '../../middlewares/role.middleware';
-import jwt from "jsonwebtoken"
-
+import { Role } from "./user.interface";
+import { checkAuth } from "../../middlewares/checkAuth";
 
 const router = Router();
 
@@ -11,32 +9,18 @@ const router = Router();
 router.post('/register', UserControllers.createUser);
 
 // ✅ Admin-only routes
-router.get('/all-users', (req: Request, res: Response, next: NextFunction) => {
-  const accessToken = req.headers.authorization;
+router.get('/all-users', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.getAllUsers);
 
-  const verifiedToken = jwt.verify(accessToken as string, "secret")
+router.get('/:id', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.getUserById);
 
-  console.log(verifiedToken);
-  next()
-  
-}, UserControllers.getAllUsers);
+router.patch('/block/:id', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.blockUser);
 
+router.patch('/unblock/:id', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.unblockUser);
 
+router.patch('/driver/approve/:id', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.approveDriver);
 
+router.patch('/driver/suspend/:id', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.suspendDriver);
 
-
-router.get('/:id',   UserControllers.getUserById);
-router.patch('/block/:id', checkAuth, checkRole('admin'), UserControllers.blockUser);
-router.patch('/unblock/:id', checkAuth, checkRole('admin'), UserControllers.unblockUser);
-router.patch('/driver/approve/:id', checkAuth, checkRole('admin'), UserControllers.approveDriver);
-router.patch('/driver/suspend/:id', checkAuth, checkRole('admin'), UserControllers.suspendDriver);
-
-// ✅ Driver-only route: update online/offline status
-router.patch(
-  '/driver/availability',
-  checkAuth,
-  checkRole('driver'),
-  UserControllers.updateDriverAvailability
-);
+router.patch('/driver/availability', checkAuth(Role.SUPER_ADMIN,Role.ADMIN),UserControllers.updateDriverAvailability);
 
 export const UserRoutes = router;

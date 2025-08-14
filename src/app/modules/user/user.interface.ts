@@ -6,10 +6,10 @@ export enum Role {
 }
 
 
-// export interface IAuthProvider {
-//   provider: 'google' | 'credentials';
-//   providerId?: string;
-// }
+export interface IAuthProvider {
+  provider: 'google' | 'credentials';
+  providerId?: string;
+}
 
 export enum IsActive {
   ACTIVE = "ACTIVE",
@@ -22,7 +22,7 @@ export interface IUser {
   name: string;
   email: string;
   password?: string;
-  role: Role;
+  role?: Role;
   isBlocked?: boolean;
   isApproved?: boolean;
   isActive?: IsActive;
@@ -30,5 +30,13 @@ export interface IUser {
   totalEarnings?: number;
   createdAt?: Date;
   updatedAt?: Date;
-  // auths?: IAuthProvider[];
+  auths?: IAuthProvider[];
+  isOnline?: boolean;
+}
+
+export interface IDriverExtra {
+  isApproved: boolean;
+  isOnline: boolean;
+  vehicleInfo: string;
+  totalEarnings?: number;
 }

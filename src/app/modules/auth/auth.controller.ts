@@ -17,11 +17,11 @@ export const AuthController = {
 
       const result = await AuthServices.login(req.body);
 
-      console.log(result);
+   
 
       res.status(httpStatus.OK).json({
         success: true,
-        message: 'Login successful',
+        message: ' Login successful',
         data: result,
       });
     } catch (err: any) {

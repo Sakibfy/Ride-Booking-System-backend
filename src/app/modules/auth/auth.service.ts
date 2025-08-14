@@ -1,17 +1,19 @@
-import bcryptjs from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import httpStatus from 'http-status-codes';
-import { User } from '../user/user.model';
 import AppError from "../../errorHelpers/AppError";
 import { IUser } from '../user/user.interface';
 import jwt from "jsonwebtoken"
+import { User } from '../user/user.model';
 
 export const login =  async (payload: Partial<IUser>) => {
   
     const { email, password } = payload
     
-    const isUserExist  = await User.findOne({ email });
-
-    // console.log('usersss',password, user);
+  const isUserExist = await User.findOne({ email });
+  
+    // console.log('Login Input Password:', password);
+    // console.log('Hashed from DB:',);
+    
 
     if (!isUserExist) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'User Invalid credentials');
@@ -27,13 +29,15 @@ export const login =  async (payload: Partial<IUser>) => {
       );
     }
 
-    // this code is not working 
-    // **TO-DO**
-  //  const isPasswordMatched = await bcryptjs.compare(password as string, user.password as string)
+  
+  //   const isPasswordMatched = await bcrypt.compare(password, isUserExist.password);
+  //   console.log('Password Match:', password);
 
   //   if (!isPasswordMatched) {
   //        throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password")
-  //    }
+  // }
+  
+
   const jwtPayload = {
     userId: isUserExist._id,
     email: isUserExist.email,

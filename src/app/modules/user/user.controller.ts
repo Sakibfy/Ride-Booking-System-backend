@@ -1,14 +1,15 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { UserService } from './user.service';
 import { User } from './user.model';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import httpStatus from 'http-status-codes';
 import { envVars } from '../../config/env';
+
 
 // 🚀 Register user (rider or driver)
 const createUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role, vehicleInfo } = req.body;
+    const { name, email, password, role } = req.body;
 
     // console.log(password);
 
@@ -16,7 +17,7 @@ const createUser = async (req: Request, res: Response) => {
     if (!name || !email || !password || !role) {
       return res.status(httpStatus.BAD_REQUEST).json({
         success: false,
-        message: 'Name, email, password, and role are required.',
+        message: `${name}, ${email}, ${password}, and ${role} are required.`,
       });
     }
 
@@ -30,7 +31,7 @@ const createUser = async (req: Request, res: Response) => {
     }
 
   
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND))
     
 const newUser = await User.create({
   name,
@@ -38,8 +39,6 @@ const newUser = await User.create({
   password: hashedPassword,
   role,
 });
-
-    console.log("newuser", newUser);
 
     // ✅ Exclude password from response
     const { password: _, ...userWithoutPassword } = newUser.toObject();
@@ -57,6 +56,7 @@ const newUser = await User.create({
     });
   }
 };
+
 
 
 // ✅ Get all users (admin only)
@@ -183,10 +183,17 @@ const suspendDriver = async (req: Request, res: Response) => {
   }
 };
 
-// ✅ Driver updates their availability (online/offline)
 const updateDriverAvailability = async (req: Request, res: Response) => {
   try {
-    const userId = req.user._id; // populated from auth middleware
+    const userId = req.user?._id;
+
+    if (!userId) {
+      return res.status(httpStatus.UNAUTHORIZED).json({
+        success: false,
+        message: 'Unauthorized. User ID missing.',
+      });
+    }
+
     const { isOnline } = req.body;
 
     const updated = await UserService.updateDriverAvailability(userId, isOnline);
@@ -210,6 +217,7 @@ const updateDriverAvailability = async (req: Request, res: Response) => {
   }
 };
 
+
 export const UserControllers = {
   createUser,
   getAllUsers,
@@ -219,4 +227,5 @@ export const UserControllers = {
   approveDriver,
   suspendDriver,
   updateDriverAvailability,
+ 
 };
