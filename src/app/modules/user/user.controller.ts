@@ -1,19 +1,20 @@
 import { NextFunction, Request, Response } from 'express';
-import { UserService } from './user.service';
+import { UserService, UserServices } from './user.service';
 import { User } from './user.model';
 import bcrypt from 'bcryptjs';
 import httpStatus from 'http-status-codes';
 import { envVars } from '../../config/env';
+import { sendResponse } from '../../utils/apiResponse';
+import { JwtPayload } from 'jsonwebtoken';
+import { catchAsync } from '../../utils/catchAsync';
+import AppError from '../../errorHelpers/AppError';
 
 
-// 🚀 Register user (rider or driver)
 const createUser = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // console.log(password);
-
-    // ✅ Basic validation
+    
     if (!name || !email || !password || !role) {
       return res.status(httpStatus.BAD_REQUEST).json({
         success: false,
@@ -30,7 +31,6 @@ const createUser = async (req: Request, res: Response) => {
       });
     }
 
-  
     const hashedPassword = await bcrypt.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND))
     
 const newUser = await User.create({
@@ -58,7 +58,6 @@ const newUser = await User.create({
 };
 
 
-
 // ✅ Get all users (admin only)
 const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -71,6 +70,23 @@ const getAllUsers = async (req: Request, res: Response) => {
     });
   }
 };
+
+const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const decodedToken = req.user as JwtPayload
+
+  const result = await UserServices.getMe(decodedToken.userId);
+  
+  // console.log('000000',result);
+
+  sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Your profile Retrieved Successfully",
+      data: result.data
+  })
+})
+
+
 
 // ✅ Get user by ID (admin only)
 const getUserById = async (req: Request, res: Response) => {
@@ -227,5 +243,6 @@ export const UserControllers = {
   approveDriver,
   suspendDriver,
   updateDriverAvailability,
+  getMe
  
 };

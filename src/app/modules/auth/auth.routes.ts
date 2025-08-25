@@ -1,22 +1,13 @@
 
 import { Router } from 'express';
-import { AuthController } from './auth.controller';
+import { AuthControllers } from './auth.controller';
 
 const router = Router();
 
-router.post("/login", AuthController.login)
+router.post("/login", AuthControllers.credentialsLogin)
+router.post("/refresh-token", AuthControllers.getNewAccessToken)
+router.post("/logout", AuthControllers.logout)
 
 
-// 🔹 Google Login Route
-// router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// // 🔹 Google Callback Route
-// router.get(
-//   '/google/callback',
-//   passport.authenticate('google', { failureRedirect: '/login' }),
-//   (req, res) => {
-//     res.redirect('/dashboard'); // or return token for SPA
-//   }
-// );
 
 export const authRoutes = router;

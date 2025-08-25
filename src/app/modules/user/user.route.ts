@@ -11,6 +11,9 @@ router.post('/register', UserControllers.createUser);
 // ✅ Admin-only routes
 router.get('/all-users', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.getAllUsers);
 
+router.get("/me", checkAuth(...Object.values(Role)), UserControllers.getMe)
+
+
 router.get('/:id', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.getUserById);
 
 router.patch('/block/:id', checkAuth(Role.SUPER_ADMIN, Role.ADMIN), UserControllers.blockUser);

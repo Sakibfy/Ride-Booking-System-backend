@@ -2,7 +2,6 @@
 import app from "./app";
 import { Server } from "http";
 import mongoose from "mongoose";
-
 import { seedSuoerAdmin } from "./app/utils/seedSuoerAdmin";
 import { envVars } from "./app/config/env";
 
